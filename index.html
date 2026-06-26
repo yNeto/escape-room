@@ -122,6 +122,34 @@
         text-shadow: 0 0 5px #fff;
       }
 
+      .btn-dica {
+        background: transparent;
+        color: var(--warning-orange);
+        border: 1px dashed var(--warning-orange);
+        padding: 10px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: bold;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 15px;
+        width: 100%;
+        transition: all 0.3s;
+        display: none;
+      }
+      .btn-dica:hover {
+        background: rgba(255, 170, 0, 0.1);
+        box-shadow: 0 0 10px rgba(255, 170, 0, 0.4);
+      }
+      .box-dica {
+        background: rgba(255, 170, 0, 0.05);
+        border-left: 4px solid var(--warning-orange);
+        padding: 15px;
+        margin-top: 10px;
+        color: #fff;
+        font-size: 15px;
+        display: none;
+      }
+
       .chances-box {
         background: rgba(255, 51, 51, 0.1);
         border: 1px dashed var(--danger-red);
@@ -293,7 +321,6 @@
         text-shadow: 0 0 5px var(--danger-red);
         text-align: center;
       }
-
       .toast-alerta {
         position: absolute;
         top: -20px;
@@ -421,14 +448,14 @@
         <p><strong>[ PROJETO: O GRANDE ESCAPE VIRTUAL ]</strong></p>
         <p>
           <strong>O Cenário:</strong> O "Tutor Virtual Mestre" sofreu um colapso
-          algorítmico e está distribuindo notas injustas.
+          algorítmico e está a distribuir notas injustas.
         </p>
         <p>
-          Sua equipe tem 20 minutos para explorar o código-fonte, resolver as
-          anomalias e purgar o viés. <strong>Atenção:</strong> O sistema possui
-          defesa ativa. Erros farão com que o núcleo mude a lógica do código
-          para se proteger. No servidor mestre (Nível 3), a tolerância a falhas
-          é ZERO.
+          A vossa equipa tem 20 minutos para explorar o código-fonte, resolver
+          as anomalias e purgar o viés. <strong>Atenção:</strong> O sistema
+          possui defesa ativa. Erros farão com que o núcleo mude a lógica do
+          código para se proteger. No servidor mestre (Nível 3), a tolerância a
+          falhas é ZERO.
         </p>
 
         <button
@@ -479,6 +506,13 @@
           ⚠️ TENTATIVAS ANTES DO BLOQUEIO: <span id="chances-e1">2</span>
         </div>
 
+        <button class="btn-dica" id="btn-dica-1" onclick="mostrarDica(1)">
+          💡 SOLICITAR DICA DE DEPURAÇÃO
+        </button>
+        <div class="box-dica" id="box-dica-1">
+          <strong>DICA DO SISTEMA:</strong> <span id="texto-dica-1"></span>
+        </div>
+
         <button class="action-btn" onclick="validar(1)">
           CALIBRAR SISTEMA
         </button>
@@ -501,9 +535,8 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
         </div>
 
         <p>
-          Dica: O número de letras no nome indicado equivale ao deslocamento da
-          cifra. Gire os cilindros do cofre virtual para retornar as letras à
-          palavra original.
+          Dica: Gire os cilindros do cofre virtual para retornar as letras à
+          palavra original baseando-se no deslocamento da cifra.
         </p>
 
         <div class="combo-container" id="cofre-container">
@@ -539,6 +572,13 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
 
         <div class="chances-box">
           ⚠️ TENTATIVAS ANTES DO BLOQUEIO: <span id="chances-e2">2</span>
+        </div>
+
+        <button class="btn-dica" id="btn-dica-2" onclick="mostrarDica(2)">
+          💡 SOLICITAR DICA DE CRIPTOGRAFIA
+        </button>
+        <div class="box-dica" id="box-dica-2">
+          <strong>DICA DO SISTEMA:</strong> <span id="texto-dica-2"></span>
         </div>
 
         <button class="action-btn" onclick="validar(2)">
@@ -578,6 +618,13 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
 
         <div class="chances-box">
           ⚠️ TENTATIVAS ANTES DO BLOQUEIO: <span id="chances-e3">1</span>
+        </div>
+
+        <button class="btn-dica" id="btn-dica-3" onclick="mostrarDica(3)">
+          💡 SOLICITAR DICA DE ENGENHARIA LÓGICA
+        </button>
+        <div class="box-dica" id="box-dica-3">
+          <strong>DICA DO SISTEMA:</strong> <span id="texto-dica-3"></span>
         </div>
 
         <p id="erro-enigma3" class="erro">ERRO: Curto-circuito detectado.</p>
@@ -638,36 +685,42 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
             codigo: `nota = 0\ncontador = 1\nwhile contador <= 5:\n    if contador % 2 != 0:\n        nota = nota + 5\n    else:\n        nota = nota - 2\n    contador = contador + 1\n\nprint("Nota final:", nota)`,
             res: "11",
             desc: "Laço while de 5 ciclos. Ímpares (+5), pares (-2). Matemática: 15 - 4 = 11.",
+            dica: "Lembre-se do operador módulo (%). Ele verifica o resto da divisão. O que acontece com a nota quando o contador NÃO é perfeitamente divisível por 2?",
           },
           {
             codigo: `nota = 0\nfor i in range(1, 5):\n    if i % 2 == 0:\n        nota = nota + 4\n    else:\n        nota = nota + 1\n\nprint("Nota final:", nota)`,
             res: "10",
             desc: "Laço for de 4 ciclos. Ímpares (+1), pares (+4). Matemática: 2 + 8 = 10.",
+            dica: "Cuidado com os limites da função range() em Python. Ela inclui o primeiro número, mas será que ela executa até incluir o último parâmetro listado?",
           },
           {
             codigo: `pontos = 8\nx = 1\nwhile x <= 3:\n    pontos = pontos + x\n    x = x + 1\n\nprint("Pontos finais:", pontos)`,
             res: "14",
             desc: "Inicia com 8. Laço soma 1 (9), soma 2 (11), soma 3 (14). Total = 14.",
+            dica: "Atenção ao acumulador! O valor que você adiciona aos pontos não é estático; a variável 'x' cresce a cada iteração do laço antes do término.",
           },
         ],
         2: [
           {
-            dica: '"ADA"',
+            dicaTxt: '"ADA"',
             log: "UURW",
             res: "ROOT",
             desc: "ADA tem 3 letras (deslocamento -3). U-3=R, U-3=O, R-3=O, W-3=T -> ROOT.",
+            dica: "Na Criptografia de César Clássica, a chave costuma ser um número que representa um deslocamento. Tente contar os caracteres do nome da pioneira para descobrir o salto.",
           },
           {
-            dica: '"JOBS"',
+            dicaTxt: '"JOBS"',
             log: "HEXE",
             res: "DATA",
             desc: "JOBS tem 4 letras (deslocamento -4). H-4=D, E-4=A, X-4=T, E-4=A -> DATA.",
+            dica: "O tamanho do nome do pioneiro determina a distância geométrica exata entre as letras originais e a cifra na ordem do alfabeto.",
           },
           {
-            dica: '"ALAN"',
+            dicaTxt: '"ALAN"',
             log: "GSHI",
             res: "CODE",
             desc: "ALAN tem 4 letras (deslocamento -4). G-4=C, S-4=O, H-4=D, I-4=E -> CODE.",
+            dica: "A decodificação depende puramente de um deslocamento numérico. Quantos caracteres formam a sua única pista textual em destaque?",
           },
         ],
         3: [
@@ -676,54 +729,63 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
             sen: "P = 0, Q = 0, R = 1",
             res: "1",
             desc: "NOT(0 OR 0) = 1. (1 XOR 0) = 1. 1 AND 1 = 1 (Verdadeiro).",
+            dica: "Siga a ordem de precedência lógica estrita: resolva o interior dos parênteses primeiro, depois aplique os inversores (NOT), e só então faça a multiplicação lógica (AND).",
           },
           {
             exp: "Saida = (P AND Q) OR NOT(R AND P)",
             sen: "P = 1, Q = 0, R = 1",
             res: "0",
             desc: "(1 AND 0) = 0. NOT(1 AND 1) = 0. 0 OR 0 = 0 (Falso).",
+            dica: "Revise a tabela-verdade da porta lógica AND: a saída desse circuito só terá energia (1) se TODAS as suas entradas simultâneas forem verdadeiras.",
           },
           {
             exp: "Saida = (P XOR Q) OR (NOT R AND P)",
             sen: "P = 1, Q = 1, R = 0",
             res: "1",
             desc: "(1 XOR 1) = 0. NOT(0) AND 1 = 1. 0 OR 1 = 1 (Verdadeiro).",
+            dica: "A porta Ou-Exclusivo (XOR) atua como um detector de diferenças. Se as duas entradas receberem exatamente a mesma carga, qual é o resultado que ela libera?",
           },
           {
             exp: "Saida = (P AND NOT Q) XOR (R OR Q)",
             sen: "P = 1, Q = 0, R = 0",
             res: "1",
             desc: "(1 AND 1) = 1. (0 OR 0) = 0. 1 XOR 0 = 1 (Verdadeiro).",
+            dica: "Cuidado com as negações atreladas diretamente a uma variável antes de uma operação de bloco. Você deve inverter o sinal do sensor 'Q' antes de multiplicá-lo por 'P'.",
           },
           {
             exp: "Saida = NOT(P XOR R) AND (Q OR NOT P)",
             sen: "P = 1, Q = 1, R = 0",
             res: "0",
             desc: "NOT(1 XOR 0) = 0. (1 OR 0) = 1. 0 AND 1 = 0 (Falso).",
+            dica: "Um inversor lógico (NOT) acoplado do lado de fora de um parêntese funciona como uma barreira final que inverte o resultado de toda aquela operação interna antes de enviá-la para frente.",
           },
           {
             exp: "Saida = (P OR Q) AND NOT(P AND R)",
             sen: "P = 1, Q = 0, R = 1",
             res: "0",
             desc: "(1 OR 0) = 1. NOT(1 AND 1) = 0. 1 AND 0 = 0 (Falso).",
+            dica: "A expressão possui uma porta NAND (NOT AND) disfarçada no lado direito. Se P e R forem ambos verdadeiros juntos, toda essa metade da equação será anulada para Falso.",
           },
           {
             exp: "Saida = (R XOR Q) OR NOT(P OR R)",
             sen: "P = 0, Q = 0, R = 0",
             res: "1",
             desc: "(0 XOR 0) = 0. NOT(0 OR 0) = 1. 0 OR 1 = 1 (Verdadeiro).",
+            dica: "A porta NOR (NOT OR) contida na segunda metade da equação tem um comportamento exclusivo: ela só deixará a energia passar (1) se absolutamente NENHUM de seus sensores estiver ativo.",
           },
           {
             exp: "Saida = NOT(P AND Q AND R) XOR P",
             sen: "P = 1, Q = 1, R = 1",
             res: "1",
             desc: "NOT(1 AND 1 AND 1) = 0. 0 XOR 1 = 1 (Verdadeiro).",
+            dica: "A porta NAND tripla (bloco da esquerda) avalia se todos os três sensores estão ativos antes de inverter a carga. Caso o sistema esteja em carga máxima simultânea, ela desliga e envia 0.",
           },
           {
             exp: "Saida = (P AND R) XOR (Q OR NOT R)",
             sen: "P = 0, Q = 1, R = 1",
             res: "1",
             desc: "(0 AND 1) = 0. (1 OR 0) = 1. 0 XOR 1 = 1 (Verdadeiro).",
+            dica: "Para a porta XOR final disparar energia positiva, um (e apenas um) dos seus lados de alimentação precisa obrigatoriamente ser diferente do outro. Avalie os grandes blocos de forma isolada.",
           },
         ],
       };
@@ -748,13 +810,30 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
       function renderizarEnigmas() {
         document.getElementById("codigo-e1").innerText =
           bd[1][indexAtual[1]].codigo;
+        document.getElementById("texto-dica-1").innerText =
+          bd[1][indexAtual[1]].dica;
+
         document.getElementById("dica-e2").innerText =
-          bd[2][indexAtual[2]].dica;
+          bd[2][indexAtual[2]].dicaTxt;
         document.getElementById("log-e2").innerText = bd[2][indexAtual[2]].log;
+        document.getElementById("texto-dica-2").innerText =
+          bd[2][indexAtual[2]].dica;
+
         document.getElementById("expressao-e3").innerText =
           bd[3][indexAtual[3]].exp;
         document.getElementById("sensores-e3").innerText =
           bd[3][indexAtual[3]].sen;
+        document.getElementById("texto-dica-3").innerText =
+          bd[3][indexAtual[3]].dica;
+      }
+
+      function mostrarDica(nivel) {
+        const boxDica = document.getElementById("box-dica-" + nivel);
+        if (boxDica.style.display === "none" || boxDica.style.display === "") {
+          boxDica.style.display = "block";
+        } else {
+          boxDica.style.display = "none";
+        }
       }
 
       function mudarLetra(posicaoSpinner, direcao) {
@@ -772,13 +851,12 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
           alfabeto[indicesLetras[indexArray]];
         document.getElementById("erro-enigma2").style.display = "none";
       }
-
       function mudarTela(atual, proxima) {
         document.getElementById(atual).classList.remove("ativa");
         document.getElementById(proxima).classList.add("ativa");
       }
 
-      function dispararErroVisual(id, nivel) {
+      function dispararErroVisual(id) {
         const erroMsg = document.getElementById(id);
         const container = document.getElementById("main-container");
 
@@ -794,6 +872,9 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
 
         alerta.style.display = "block";
         container.classList.add("hack-alert");
+
+        document.getElementById("btn-dica-" + nivel).style.display = "block";
+        document.getElementById("box-dica-" + nivel).style.display = "none";
 
         indexAtual[nivel] = (indexAtual[nivel] + 1) % bd[nivel].length;
         erros[nivel] = 0;
@@ -824,7 +905,7 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
         } else {
           erros[nivel]++;
           atualizarContadoresVisuais();
-          dispararErroVisual("erro-enigma" + nivel, nivel);
+          dispararErroVisual("erro-enigma" + nivel);
 
           if (erros[nivel] >= limiteErros) {
             document.getElementById("erro-enigma" + nivel).style.display =
@@ -866,9 +947,11 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
           document.getElementById("letra" + i).innerText = "A";
         }
 
-        document.getElementById("erro-enigma1").style.display = "none";
-        document.getElementById("erro-enigma2").style.display = "none";
-        document.getElementById("erro-enigma3").style.display = "none";
+        for (let i = 1; i <= 3; i++) {
+          document.getElementById("btn-dica-" + i).style.display = "none";
+          document.getElementById("box-dica-" + i).style.display = "none";
+          document.getElementById("erro-enigma" + i).style.display = "none";
+        }
 
         atualizarContadoresVisuais();
         renderizarEnigmas();
