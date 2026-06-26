@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Escape Room: Defesa Ativa</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>"
+    />
+
+    <style>
+      :root {
+        --neon-green: #00ff41;
+        --dark-bg: #0d0208;
+        --terminal-gray: rgba(0, 20, 0, 0.85);
+        --danger-red: #ff3333;
+        --warning-orange: #ffaa00;
+      }
+
+      body {
+        background-color: var(--dark-bg);
+        background-image:
+          linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px);
+        background-size: 30px 30px;
+        animation: gridMove 20s linear infinite;
+        color: var(--neon-green);
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow-y: auto;
+      }
+
+      body::after {
+        content: " ";
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+          rgba(18, 16, 16, 0) 50%,
+          rgba(0, 0, 0, 0.25) 50%
+        );
+        background-size: 100% 4px;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 800px;
+        background: var(--terminal-gray);
+        border: 2px solid var(--neon-green);
+        box-shadow:
+          0 0 20px rgba(0, 255, 65, 0.3),
+          inset 0 0 15px rgba(0, 255, 65, 0.1);
+        padding: 40px;
+        border-radius: 8px;
+        position: relative;
+        z-index: 20;
+        margin: 40px 0;
+        backdrop-filter: blur(5px);
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .container.hack-alert {
+        border-color: var(--warning-orange);
+        box-shadow:
+          0 0 30px rgba(255, 170, 0, 0.5),
+          inset 0 0 20px rgba(255, 170, 0, 0.2);
+      }
+
+      .tela {
+        display: none;
+      }
+      .tela.ativa {
+        display: block;
+        animation: fadeInScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      h2 {
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--neon-green);
+        padding-bottom: 10px;
+        margin-top: 0;
+        text-shadow: 0 0 5px var(--neon-green);
+        animation: glitch 3s infinite;
+      }
+      p {
+        line-height: 1.6;
+        font-size: 16px;
+      }
+
+      .codigo-bloco {
+        background: #000;
+        border: 1px dashed var(--neon-green);
+        border-left: 5px solid var(--neon-green);
+        padding: 15px;
+        text-align: left;
+        overflow-x: auto;
+        color: #0c0;
+        margin: 20px 0;
+        box-shadow: inset 0 0 10px #000;
+      }
+
+      pre {
+        margin: 0;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 16px;
+      }
+      .destaque {
+        color: #fff;
+        font-weight: bold;
+        text-shadow: 0 0 5px #fff;
+      }
+
+      .chances-box {
+        background: rgba(255, 51, 51, 0.1);
+        border: 1px dashed var(--danger-red);
+        color: var(--danger-red);
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        margin-top: 25px;
+        border-radius: 4px;
+        text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+      }
+      .chances-box span {
+        font-size: 22px;
+        color: #fff;
+        text-shadow: 0 0 8px var(--danger-red);
+      }
+
+      .slider-container {
+        margin: 30px 0;
+        text-align: center;
+      }
+      .visor-slider {
+        font-size: 36px;
+        color: #fff;
+        text-shadow: 0 0 10px var(--neon-green);
+        display: block;
+        margin-bottom: 15px;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 24px;
+        width: 24px;
+        background: #fff;
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--neon-green);
+        margin-top: -10px;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: var(--neon-green);
+        border-radius: 2px;
+      }
+
+      .combo-container {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 30px 0;
+      }
+      .spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .letra-visor {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 36px;
+        font-weight: bold;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000;
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        user-select: none;
+      }
+      .btn-seta {
+        background: transparent;
+        border: none;
+        color: var(--neon-green);
+        font-size: 24px;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          color 0.2s,
+          text-shadow 0.2s;
+        padding: 0;
+        outline: none;
+      }
+      .btn-seta:hover {
+        transform: scale(1.3);
+        color: #fff;
+        text-shadow: 0 0 10px var(--neon-green);
+      }
+      .btn-seta:active {
+        transform: scale(0.9);
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+      }
+      .btn-logic {
+        flex: 1;
+        padding: 20px;
+        font-size: 20px;
+        border: 2px solid #555;
+        background: #111;
+        color: #888;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .btn-logic:hover {
+        border-color: var(--neon-green);
+        color: var(--neon-green);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+      }
+      .btn-logic.zero:hover {
+        border-color: var(--danger-red);
+        color: var(--danger-red);
+        box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+      }
+
+      /* Botões de Ação Geral */
+      button.action-btn {
+        background: var(--neon-green);
+        color: #000;
+        border: none;
+        padding: 15px 20px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: bold;
+        font-size: 18px;
+        cursor: pointer;
+        margin-top: 20px;
+        width: 100%;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+      }
+      button.action-btn:hover {
+        background: #fff;
+        box-shadow: 0 0 20px var(--neon-green);
+        transform: translateY(-2px);
+      }
+
+      .btn-reset {
+        background: #333;
+        color: #fff;
+        margin-top: 30px;
+        border: 1px solid #555;
+        box-shadow: none;
+      }
+      .btn-reset:hover {
+        background: #555;
+        color: var(--neon-green);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        transform: none;
+      }
+
+      .erro {
+        color: var(--danger-red);
+        margin-top: 15px;
+        display: none;
+        font-weight: bold;
+        text-shadow: 0 0 5px var(--danger-red);
+        text-align: center;
+      }
+
+      .toast-alerta {
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--warning-orange);
+        color: #000;
+        padding: 10px 20px;
+        font-weight: bold;
+        border-radius: 5px;
+        display: none;
+        box-shadow: 0 0 15px var(--warning-orange);
+        z-index: 100;
+        text-transform: uppercase;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .feedback-box {
+        background: rgba(0, 255, 65, 0.05);
+        border: 1px solid var(--neon-green);
+        padding: 25px;
+        margin-top: 30px;
+        border-radius: 5px;
+      }
+      .feedback-item {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px dashed rgba(0, 255, 65, 0.3);
+      }
+      .feedback-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .creditos {
+        margin-top: 40px;
+        padding-top: 15px;
+        border-top: 1px dashed rgba(0, 255, 65, 0.3);
+        font-size: 13px;
+        text-align: center;
+        color: #888;
+      }
+      .creditos strong {
+        color: var(--neon-green);
+      }
+
+      @keyframes gridMove {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 30px 30px;
+        }
+      }
+      @keyframes fadeInScale {
+        0% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes glitch {
+        0%,
+        100% {
+          transform: translate(0);
+          text-shadow: 0 0 5px var(--neon-green);
+        }
+        20% {
+          transform: translate(-2px, 1px);
+          text-shadow:
+            -2px 0 red,
+            2px 0 blue;
+        }
+        40% {
+          transform: translate(-1px, -1px);
+          text-shadow:
+            1px 0 red,
+            -1px 0 blue;
+        }
+        60% {
+          transform: translate(2px, 1px);
+          text-shadow:
+            -1px 0 red,
+            1px 0 blue;
+        }
+        80% {
+          transform: translate(1px, -1px);
+          text-shadow:
+            2px 0 red,
+            -2px 0 blue;
+        }
+      }
+      @keyframes shakeErro {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20%,
+        60% {
+          transform: translateX(-10px);
+        }
+        40%,
+        80% {
+          transform: translateX(10px);
+        }
+      }
+      .shake {
+        animation: shakeErro 0.4s ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="main-container">
+      <div id="toast-alerta" class="toast-alerta">
+        ⚠️ DEFESA ATIVADA: O ENIGMA FOI ALTERADO!
+      </div>
+
+      <div id="tela-intro" class="tela ativa">
+        <h2>> Inicializando Ambiente Virtual</h2>
+        <p><strong>[ PROJETO: O GRANDE ESCAPE VIRTUAL ]</strong></p>
+        <p>
+          <strong>O Cenário:</strong> O "Tutor Virtual Mestre" sofreu um colapso
+          algorítmico e está distribuindo notas injustas.
+        </p>
+        <p>
+          Sua equipe tem 20 minutos para explorar o código-fonte, resolver as
+          anomalias e purgar o viés. <strong>Atenção:</strong> O sistema possui
+          defesa ativa. Erros farão com que o núcleo mude a lógica do código
+          para se proteger. No servidor mestre (Nível 3), a tolerância a falhas
+          é ZERO.
+        </p>
+
+        <button
+          class="action-btn"
+          onclick="mudarTela('tela-intro', 'tela-enigma1')"
+        >
+          INICIAR HACKEAMENTO
+        </button>
+
+        <div class="creditos">
+          <p>
+            <strong>Disciplina:</strong> MATB21 - Ambientes Interativos de
+            Aprendizagem
+          </p>
+          <p>
+            <strong>Equipe de Desenvolvimento:</strong> Antonio Carlos, Allan
+            Borges, João Rebleh, Thiago Lima
+          </p>
+        </div>
+      </div>
+
+      <div id="tela-enigma1" class="tela">
+        <h2>> Nível 1: Loop de Avaliação</h2>
+        <p>
+          O laço de repetição entrou em loop. Execute o teste de mesa mental e
+          descubra a nota final para calibrar o sistema.
+        </p>
+
+        <div class="codigo-bloco">
+          <pre id="codigo-e1"></pre>
+        </div>
+
+        <div class="slider-container">
+          <span class="visor-slider"
+            >VALOR: <strong id="visor-valor">0</strong></span
+          >
+          <input
+            type="range"
+            id="slider-nota"
+            min="0"
+            max="50"
+            value="0"
+            oninput="atualizarVisor(this.value)"
+          />
+        </div>
+
+        <div class="chances-box">
+          ⚠️ TENTATIVAS ANTES DO BLOQUEIO: <span id="chances-e1">2</span>
+        </div>
+
+        <button class="action-btn" onclick="validar(1)">
+          CALIBRAR SISTEMA
+        </button>
+        <p id="erro-enigma1" class="erro">
+          ERRO: Calibragem incorreta. Acesso Negado.
+        </p>
+      </div>
+
+      <div id="tela-enigma2" class="tela">
+        <h2>> Nível 2: O Rastro Invasor</h2>
+        <p>
+          O invasor bloqueou a tabela de segurança com a Cifra de César. A pista
+          deixada no log foi o nome do pioneiro:
+          <span class="destaque" id="dica-e2"></span>.
+        </p>
+
+        <div class="codigo-bloco">
+          <pre>[LOG INTERCEPTADO]
+Hash codificado do administrador: <span id="log-e2"></span></pre>
+        </div>
+
+        <p>
+          Dica: O número de letras no nome indicado equivale ao deslocamento da
+          cifra. Gire os cilindros do cofre virtual para retornar as letras à
+          palavra original.
+        </p>
+
+        <div class="combo-container" id="cofre-container">
+          <div class="spinner">
+            <button class="btn-seta" onclick="mudarLetra(1, 1)">&#9650;</button>
+            <div class="letra-visor" id="letra1">A</div>
+            <button class="btn-seta" onclick="mudarLetra(1, -1)">
+              &#9660;
+            </button>
+          </div>
+          <div class="spinner">
+            <button class="btn-seta" onclick="mudarLetra(2, 1)">&#9650;</button>
+            <div class="letra-visor" id="letra2">A</div>
+            <button class="btn-seta" onclick="mudarLetra(2, -1)">
+              &#9660;
+            </button>
+          </div>
+          <div class="spinner">
+            <button class="btn-seta" onclick="mudarLetra(3, 1)">&#9650;</button>
+            <div class="letra-visor" id="letra3">A</div>
+            <button class="btn-seta" onclick="mudarLetra(3, -1)">
+              &#9660;
+            </button>
+          </div>
+          <div class="spinner">
+            <button class="btn-seta" onclick="mudarLetra(4, 1)">&#9650;</button>
+            <div class="letra-visor" id="letra4">A</div>
+            <button class="btn-seta" onclick="mudarLetra(4, -1)">
+              &#9660;
+            </button>
+          </div>
+        </div>
+
+        <div class="chances-box">
+          ⚠️ TENTATIVAS ANTES DO BLOQUEIO: <span id="chances-e2">2</span>
+        </div>
+
+        <button class="action-btn" onclick="validar(2)">
+          DESCRIPTOGRAFAR HASH
+        </button>
+        <p id="erro-enigma2" class="erro">
+          ERRO: Combinação inválida. Cofre travado.
+        </p>
+      </div>
+
+      <div id="tela-enigma3" class="tela">
+        <h2>> Nível 3: Disjuntor Lógico Mestre</h2>
+        <p>
+          Para religar o servidor, o disjuntor mestre precisa receber o pulso
+          elétrico correto.
+          <strong>Atenção: Margem de erro reduzida a ZERO neste nível.</strong>
+        </p>
+        <p>
+          Resolva a expressão booleana abaixo sabendo que os sensores atuais
+          indicam: <span class="destaque" id="sensores-e3"></span>.
+        </p>
+
+        <div class="codigo-bloco">
+          <pre id="expressao-e3"></pre>
+        </div>
+
+        <p>Selecione a carga elétrica resultante a ser enviada:</p>
+
+        <div class="btn-group">
+          <button class="btn-logic zero" onclick="validarBtnLogic('0')">
+            ENVIAR BIT [ 0 ]<br /><small>Sinal Falso</small>
+          </button>
+          <button class="btn-logic" onclick="validarBtnLogic('1')">
+            ENVIAR BIT [ 1 ]<br /><small>Sinal Verdadeiro</small>
+          </button>
+        </div>
+
+        <div class="chances-box">
+          ⚠️ TENTATIVAS ANTES DO BLOQUEIO: <span id="chances-e3">1</span>
+        </div>
+
+        <p id="erro-enigma3" class="erro">ERRO: Curto-circuito detectado.</p>
+      </div>
+
+      <div id="tela-sucesso" class="tela">
+        <h2>> SISTEMA RESTAURADO</h2>
+        <p
+          style="
+            color: #fff;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+          "
+        >
+          [ STATUS: OPERACIONAL - VIÉS NEUTRALIZADO ]
+        </p>
+
+        <div class="feedback-box">
+          <h3 style="color: var(--neon-green)">
+            > Consolidação Pedagógica dos Logs:
+          </h3>
+          <div class="feedback-item">
+            <strong>Nível 1 (Lógica):</strong>
+            <p id="feed-e1"></p>
+          </div>
+          <div class="feedback-item">
+            <strong>Nível 2 (Criptografia):</strong>
+            <p id="feed-e2"></p>
+          </div>
+          <div class="feedback-item">
+            <strong>Nível 3 (Booleana):</strong>
+            <p id="feed-e3"></p>
+          </div>
+        </div>
+
+        <button class="action-btn btn-reset" onclick="reiniciarJogo()">
+          REINICIAR SISTEMA (Voltar ao Início)
+        </button>
+
+        <div class="creditos">
+          <p>
+            <strong>Disciplina:</strong> MATB21 - Ambientes Interativos de
+            Aprendizagem
+          </p>
+          <p>
+            <strong>Equipe de Desenvolvimento:</strong> Antonio Carlos, Allan
+            Borges, João Rebleh, Thiago Lima
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const bd = {
+        1: [
+          {
+            codigo: `nota = 0\ncontador = 1\nwhile contador <= 5:\n    if contador % 2 != 0:\n        nota = nota + 5\n    else:\n        nota = nota - 2\n    contador = contador + 1\n\nprint("Nota final:", nota)`,
+            res: "11",
+            desc: "Laço while de 5 ciclos. Ímpares (+5), pares (-2). Matemática: 15 - 4 = 11.",
+          },
+          {
+            codigo: `nota = 0\nfor i in range(1, 5):\n    if i % 2 == 0:\n        nota = nota + 4\n    else:\n        nota = nota + 1\n\nprint("Nota final:", nota)`,
+            res: "10",
+            desc: "Laço for de 4 ciclos. Ímpares (+1), pares (+4). Matemática: 2 + 8 = 10.",
+          },
+          {
+            codigo: `pontos = 8\nx = 1\nwhile x <= 3:\n    pontos = pontos + x\n    x = x + 1\n\nprint("Pontos finais:", pontos)`,
+            res: "14",
+            desc: "Inicia com 8. Laço soma 1 (9), soma 2 (11), soma 3 (14). Total = 14.",
+          },
+        ],
+        2: [
+          {
+            dica: '"ADA"',
+            log: "UURW",
+            res: "ROOT",
+            desc: "ADA tem 3 letras (deslocamento -3). U-3=R, U-3=O, R-3=O, W-3=T -> ROOT.",
+          },
+          {
+            dica: '"JOBS"',
+            log: "HEXE",
+            res: "DATA",
+            desc: "JOBS tem 4 letras (deslocamento -4). H-4=D, E-4=A, X-4=T, E-4=A -> DATA.",
+          },
+          {
+            dica: '"ALAN"',
+            log: "GSHI",
+            res: "CODE",
+            desc: "ALAN tem 4 letras (deslocamento -4). G-4=C, S-4=O, H-4=D, I-4=E -> CODE.",
+          },
+        ],
+        3: [
+          {
+            exp: "Saida = NOT (P OR Q) AND (R XOR P)",
+            sen: "P = 0, Q = 0, R = 1",
+            res: "1",
+            desc: "NOT(0 OR 0) = 1. (1 XOR 0) = 1. 1 AND 1 = 1 (Verdadeiro).",
+          },
+          {
+            exp: "Saida = (P AND Q) OR NOT(R AND P)",
+            sen: "P = 1, Q = 0, R = 1",
+            res: "0",
+            desc: "(1 AND 0) = 0. NOT(1 AND 1) = 0. 0 OR 0 = 0 (Falso).",
+          },
+          {
+            exp: "Saida = (P XOR Q) OR (NOT R AND P)",
+            sen: "P = 1, Q = 1, R = 0",
+            res: "1",
+            desc: "(1 XOR 1) = 0. NOT(0) AND 1 = 1. 0 OR 1 = 1 (Verdadeiro).",
+          },
+          {
+            exp: "Saida = (P AND NOT Q) XOR (R OR Q)",
+            sen: "P = 1, Q = 0, R = 0",
+            res: "1",
+            desc: "(1 AND 1) = 1. (0 OR 0) = 0. 1 XOR 0 = 1 (Verdadeiro).",
+          },
+          {
+            exp: "Saida = NOT(P XOR R) AND (Q OR NOT P)",
+            sen: "P = 1, Q = 1, R = 0",
+            res: "0",
+            desc: "NOT(1 XOR 0) = 0. (1 OR 0) = 1. 0 AND 1 = 0 (Falso).",
+          },
+          {
+            exp: "Saida = (P OR Q) AND NOT(P AND R)",
+            sen: "P = 1, Q = 0, R = 1",
+            res: "0",
+            desc: "(1 OR 0) = 1. NOT(1 AND 1) = 0. 1 AND 0 = 0 (Falso).",
+          },
+          {
+            exp: "Saida = (R XOR Q) OR NOT(P OR R)",
+            sen: "P = 0, Q = 0, R = 0",
+            res: "1",
+            desc: "(0 XOR 0) = 0. NOT(0 OR 0) = 1. 0 OR 1 = 1 (Verdadeiro).",
+          },
+          {
+            exp: "Saida = NOT(P AND Q AND R) XOR P",
+            sen: "P = 1, Q = 1, R = 1",
+            res: "1",
+            desc: "NOT(1 AND 1 AND 1) = 0. 0 XOR 1 = 1 (Verdadeiro).",
+          },
+          {
+            exp: "Saida = (P AND R) XOR (Q OR NOT R)",
+            sen: "P = 0, Q = 1, R = 1",
+            res: "1",
+            desc: "(0 AND 1) = 0. (1 OR 0) = 1. 0 XOR 1 = 1 (Verdadeiro).",
+          },
+        ],
+      };
+
+      let indexAtual = { 1: 0, 2: 0, 3: 0 };
+      let erros = { 1: 0, 2: 0, 3: 0 };
+
+      const alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      let indicesLetras = [0, 0, 0, 0];
+
+      window.onload = function () {
+        renderizarEnigmas();
+        atualizarContadoresVisuais();
+      };
+
+      function atualizarContadoresVisuais() {
+        document.getElementById("chances-e1").innerText = 2 - erros[1];
+        document.getElementById("chances-e2").innerText = 2 - erros[2];
+        document.getElementById("chances-e3").innerText = 1 - erros[3];
+      }
+
+      function renderizarEnigmas() {
+        document.getElementById("codigo-e1").innerText =
+          bd[1][indexAtual[1]].codigo;
+        document.getElementById("dica-e2").innerText =
+          bd[2][indexAtual[2]].dica;
+        document.getElementById("log-e2").innerText = bd[2][indexAtual[2]].log;
+        document.getElementById("expressao-e3").innerText =
+          bd[3][indexAtual[3]].exp;
+        document.getElementById("sensores-e3").innerText =
+          bd[3][indexAtual[3]].sen;
+      }
+
+      function mudarLetra(posicaoSpinner, direcao) {
+        let indexArray = posicaoSpinner - 1;
+        indicesLetras[indexArray] += direcao;
+
+        if (indicesLetras[indexArray] < 0) {
+          indicesLetras[indexArray] = alfabeto.length - 1;
+        }
+        if (indicesLetras[indexArray] >= alfabeto.length) {
+          indicesLetras[indexArray] = 0;
+        }
+
+        document.getElementById("letra" + posicaoSpinner).innerText =
+          alfabeto[indicesLetras[indexArray]];
+        document.getElementById("erro-enigma2").style.display = "none";
+      }
+
+      function mudarTela(atual, proxima) {
+        document.getElementById(atual).classList.remove("ativa");
+        document.getElementById(proxima).classList.add("ativa");
+      }
+
+      function dispararErroVisual(id, nivel) {
+        const erroMsg = document.getElementById(id);
+        const container = document.getElementById("main-container");
+
+        erroMsg.style.display = "block";
+        container.classList.remove("shake");
+        void container.offsetWidth;
+        container.classList.add("shake");
+      }
+
+      function notificarDefesaAtiva(nivel) {
+        const alerta = document.getElementById("toast-alerta");
+        const container = document.getElementById("main-container");
+
+        alerta.style.display = "block";
+        container.classList.add("hack-alert");
+
+        indexAtual[nivel] = (indexAtual[nivel] + 1) % bd[nivel].length;
+        erros[nivel] = 0;
+
+        renderizarEnigmas();
+        atualizarContadoresVisuais();
+
+        setTimeout(() => {
+          alerta.style.display = "none";
+          container.classList.remove("hack-alert");
+        }, 3000);
+      }
+
+      function checkResposta(nivel, palpite) {
+        const respostaCorreta = bd[nivel][indexAtual[nivel]].res;
+        const limiteErros = nivel === 3 ? 1 : 2;
+
+        if (palpite === respostaCorreta) {
+          document.getElementById("feed-e" + nivel).innerHTML =
+            bd[nivel][indexAtual[nivel]].desc;
+          document.getElementById("erro-enigma" + nivel).style.display = "none";
+          erros[nivel] = 0;
+          atualizarContadoresVisuais();
+
+          const proximaTela =
+            nivel === 3 ? "tela-sucesso" : "tela-enigma" + (nivel + 1);
+          mudarTela("tela-enigma" + nivel, proximaTela);
+        } else {
+          erros[nivel]++;
+          atualizarContadoresVisuais();
+          dispararErroVisual("erro-enigma" + nivel, nivel);
+
+          if (erros[nivel] >= limiteErros) {
+            document.getElementById("erro-enigma" + nivel).style.display =
+              "none";
+            setTimeout(() => notificarDefesaAtiva(nivel), 800);
+          }
+        }
+      }
+
+      function atualizarVisor(v) {
+        document.getElementById("visor-valor").innerText = v;
+      }
+
+      function validar(nivel) {
+        if (nivel === 1) {
+          checkResposta(1, document.getElementById("slider-nota").value);
+        } else if (nivel === 2) {
+          const l1 = document.getElementById("letra1").innerText;
+          const l2 = document.getElementById("letra2").innerText;
+          const l3 = document.getElementById("letra3").innerText;
+          const l4 = document.getElementById("letra4").innerText;
+          checkResposta(2, l1 + l2 + l3 + l4);
+        }
+      }
+
+      function validarBtnLogic(bit) {
+        checkResposta(3, bit);
+      }
+
+      function reiniciarJogo() {
+        erros = { 1: 0, 2: 0, 3: 0 };
+        indexAtual = { 1: 0, 2: 0, 3: 0 };
+
+        document.getElementById("slider-nota").value = 0;
+        atualizarVisor(0);
+
+        indicesLetras = [0, 0, 0, 0];
+        for (let i = 1; i <= 4; i++) {
+          document.getElementById("letra" + i).innerText = "A";
+        }
+
+        document.getElementById("erro-enigma1").style.display = "none";
+        document.getElementById("erro-enigma2").style.display = "none";
+        document.getElementById("erro-enigma3").style.display = "none";
+
+        atualizarContadoresVisuais();
+        renderizarEnigmas();
+        mudarTela("tela-sucesso", "tela-intro");
+      }
+    </script>
+  </body>
+</html>
