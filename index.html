@@ -277,7 +277,6 @@
         box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
       }
 
-      /* Botões de Ação Geral */
       button.action-btn {
         background: var(--neon-green);
         color: #000;
@@ -448,14 +447,14 @@
         <p><strong>[ PROJETO: O GRANDE ESCAPE VIRTUAL ]</strong></p>
         <p>
           <strong>O Cenário:</strong> O "Tutor Virtual Mestre" sofreu um colapso
-          algorítmico e está a distribuir notas injustas.
+          algorítmico e está distribuindo notas injustas.
         </p>
         <p>
-          A vossa equipa tem 20 minutos para explorar o código-fonte, resolver
-          as anomalias e purgar o viés. <strong>Atenção:</strong> O sistema
-          possui defesa ativa. Erros farão com que o núcleo mude a lógica do
-          código para se proteger. No servidor mestre (Nível 3), a tolerância a
-          falhas é ZERO.
+          Sua equipe tem 20 minutos para explorar o código-fonte, resolver as
+          anomalias e purgar o viés. <strong>Atenção:</strong> O sistema possui
+          defesa ativa. Erros farão com que o núcleo mude a lógica do código
+          para se proteger. No servidor mestre (Nível 3), a tolerância a falhas
+          é ZERO.
         </p>
 
         <button
@@ -703,9 +702,9 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
         2: [
           {
             dicaTxt: '"ADA"',
-            log: "UURW",
+            log: "URRW",
             res: "ROOT",
-            desc: "ADA tem 3 letras (deslocamento -3). U-3=R, U-3=O, R-3=O, W-3=T -> ROOT.",
+            desc: "ADA tem 3 letras (deslocamento -3). U-3=R, R-3=O, R-3=O, W-3=T -> ROOT.",
             dica: "Na Criptografia de César Clássica, a chave costuma ser um número que representa um deslocamento. Tente contar os caracteres do nome da pioneira para descobrir o salto.",
           },
           {
@@ -851,6 +850,7 @@ Hash codificado do administrador: <span id="log-e2"></span></pre>
           alfabeto[indicesLetras[indexArray]];
         document.getElementById("erro-enigma2").style.display = "none";
       }
+
       function mudarTela(atual, proxima) {
         document.getElementById(atual).classList.remove("ativa");
         document.getElementById(proxima).classList.add("ativa");
